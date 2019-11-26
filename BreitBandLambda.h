@@ -20,7 +20,7 @@ int GetLambda(char *response, int len);
 #ifdef LAMBDASERIAL
 class _lambdaProbe1 {
 	bool initdone = false;
-	static const int responseLen = 20;
+	static const int responseLen = 24;
 	char response[responseLen];
 public:
 	int Lambda() {
@@ -28,16 +28,12 @@ public:
 		if (!initdone) {
 			initdone = true;
 			LAMBDASERIAL.begin(115200);
-			LAMBDASERIAL.setTimeout(250);
-		
+			LAMBDASERIAL.setTimeout(200);
 			//LAMBDASERIAL.print("9\r");
 			//LAMBDASERIAL.print("3\r");
 			//LAMBDASERIAL.print("W\r");
 			LAMBDASERIAL.print("I\r");
-			delay(50);
-#ifdef INFOSERIAL
-			INFOSERIAL.flush();
-#endif
+			LAMBDASERIAL.flush();
 			for (int k = 0; k < 12; k++) {
 				for (int i = 0; i < sizeof(response); i++) response[i] = '\0';
 				int iread = LAMBDASERIAL.readBytesUntil('\n', response, sizeof(response));
@@ -129,6 +125,7 @@ public:
 			if (res == HeatingOffButNeeded) {
 				LAMBDA2SERIAL.print("H\r");
 				LAMBDA2SERIAL.print("F\r");
+				delay(50);
 			}
 #ifdef DEBUG_SERIAL
 			DEBUG_SERIAL.println(pstr_lambdaErrors(res));
