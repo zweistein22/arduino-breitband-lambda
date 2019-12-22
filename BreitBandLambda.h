@@ -2,6 +2,9 @@
 #define __BREITBANDLAMBDA_H
 
 #define INFOSERIAL Serial
+
+#define STRINGIFY(A)  #A
+
 enum _lambdaErrors {
   SerialReadChksumError=-1,
   NoLambdaConnected=-2,
@@ -27,6 +30,10 @@ public:
 		
 		if (!initdone) {
 			initdone = true;
+#ifdef INFOSERIAL
+			INFOSERIAL.print(STRINGIFY(LAMBDASERIAL));
+			INFOSERIAL.println(":");
+#endif
 			LAMBDASERIAL.begin(115200);
 			LAMBDASERIAL.setTimeout(200);
 			//LAMBDASERIAL.print("9\r");
@@ -42,7 +49,6 @@ public:
 				INFOSERIAL.flush();
 #endif
 			}
-						
 		}
 		int res=0;
 		int ntries=3;
@@ -99,26 +105,58 @@ _lambdaProbe1 LAMBDA1;
 #ifdef LAMBDA2SERIAL
 class _lambdaProbe2 {
 	bool initdone = false;
-	static const int responseLen = 20;
+	static const int responseLen = 24;
 	char response[responseLen];
 public:
 	int Lambda() {
 		if (!initdone) {
-			LAMBDA2SERIAL.begin(115200);
-			LAMBDA2SERIAL.setTimeout(250);
-
 			initdone = true;
-		}
-		for (int i = 0; i < sizeof(response); i++) response[i] = '\0';
-		int read = LAMBDA2SERIAL.readBytesUntil('\n', response, sizeof(response));
-#ifdef DEBUG_SERIAL
-		DEBUG_SERIAL.println(response);
+#ifdef INFOSERIAL
+			INFOSERIAL.print(STRINGIFY(LAMBDA2SERIAL));
+			INFOSERIAL.println(":");
 #endif
-		int res = GetLambda(response, read);
+			LAMBDA2SERIAL.begin(115200);
+			LAMBDA2SERIAL.setTimeout(200);
+			//LAMBDASERIAL.print("9\r");
+			//LAMBDASERIAL.print("3\r");
+			//LAMBDASERIAL.print("W\r");
+			LAMBDA2SERIAL.print("I\r");
+			LAMBDA2SERIAL.flush();
+			for (int k = 0; k < 12; k++) {
+				for (int i = 0; i < sizeof(response); i++) response[i] = '\0';
+				int iread = LAMBDA2SERIAL.readBytesUntil('\n', response, sizeof(response));
+#ifdef INFOSERIAL
+				INFOSERIAL.println(response);
+				INFOSERIAL.flush();
+#endif
+			}
+		}
+		int res = 0;
+		int ntries = 3;
+		for (int j = 0; j < ntries; j++) {
+			int read = 0;
+			do {
+				for (int i = 0; i < sizeof(response); i++) response[i] = '\0';
+				read = LAMBDA2SERIAL.readBytesUntil('\n', response, sizeof(response));
+#ifdef DEBUGSERIAL
+				//	DEBUGSERIAL.print("response[read]=");
+				//	DEBUGSERIAL.print(response[read],HEX);
+				//	DEBUGSERIAL.print("response[read-1]=");
+				//	DEBUGSERIAL.print(response[read-1],HEX);
+				DEBUGSERIAL.println(response);
+#endif	 
+		}while (read == sizeof(response));
+		res = GetLambda(response, read);
 		if (res >= 0) {
-#ifdef DEBUG_SERIAL
-			DEBUG_SERIAL.print("l=");
-			DEBUG_SERIAL.println(res);
+#ifdef DEBUGSERIAL
+			DEBUGSERIAL.print(" LAMBDA(read=");
+			DEBUGSERIAL.print(read);
+			DEBUGSERIAL.print("):");
+			DEBUGSERIAL.println(response);
+#endif
+#ifdef DEBUGSERIAL
+			DEBUGSERIAL.print("l=");
+			DEBUGSERIAL.println(res);
 #endif
 		}
 		else {
@@ -126,11 +164,18 @@ public:
 				LAMBDA2SERIAL.print("H\r");
 				LAMBDA2SERIAL.print("F\r");
 				delay(50);
+
 			}
-#ifdef DEBUG_SERIAL
-			DEBUG_SERIAL.println(pstr_lambdaErrors(res));
+#ifdef DEBUGSERIAL
+			DEBUGSERIAL.println(pstr_lambdaErrors(res));
 #endif
 		}
+		if (res != SerialReadChksumError) break;
+#ifdef INFOSERIAL
+		if (j == ntries)	INFOSERIAL.println("j==ntries");
+#endif
+	}
+
 		return res;
 	}
 
