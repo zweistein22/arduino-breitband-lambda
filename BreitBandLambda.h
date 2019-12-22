@@ -4,6 +4,7 @@
 #define INFOSERIAL Serial
 
 #define STRINGIFY(A)  #A
+#define XSTRINGIFY(A)  STRINGIFY(A)
 
 enum _lambdaErrors {
   SerialReadChksumError=-1,
@@ -31,7 +32,7 @@ public:
 		if (!initdone) {
 			initdone = true;
 #ifdef INFOSERIAL
-			INFOSERIAL.print(STRINGIFY(LAMBDASERIAL));
+			INFOSERIAL.print(XSTRINGIFY(LAMBDASERIAL));
 			INFOSERIAL.println(":");
 #endif
 			LAMBDASERIAL.begin(115200);
@@ -112,7 +113,7 @@ public:
 		if (!initdone) {
 			initdone = true;
 #ifdef INFOSERIAL
-			INFOSERIAL.print(STRINGIFY(LAMBDA2SERIAL));
+			INFOSERIAL.print(XSTRINGIFY(LAMBDA2SERIAL));
 			INFOSERIAL.println(":");
 #endif
 			LAMBDA2SERIAL.begin(115200);
