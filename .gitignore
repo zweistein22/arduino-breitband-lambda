@@ -1,0 +1,7 @@
+Browse.VC.*
+*.suo
+VSWorkspaceState.json
+slnx.sqlite
+*.obj
+*.pdb
+
