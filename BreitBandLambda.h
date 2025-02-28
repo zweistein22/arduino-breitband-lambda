@@ -1,7 +1,8 @@
 #ifndef __BREITBANDLAMBDA_H
 #define __BREITBANDLAMBDA_H
 
-#define INFOSERIAL Serial
+//#define INFOSERIAL(call) Serial.call
+//#define INFOSERIAL(call)
 
 #define STRINGIFY(A)  #A
 #define XSTRINGIFY(A)  STRINGIFY(A)
@@ -23,18 +24,19 @@ int GetLambda(char *response, int len);
 
 #ifdef LAMBDASERIAL
 class _lambdaProbe1 {
-	bool initdone = false;
+	
 	static const int responseLen = 24;
 	char response[responseLen];
 public:
+	bool initdone = false;
 	int Lambda() {
 		
 		if (!initdone) {
 			initdone = true;
-#ifdef INFOSERIAL
-			INFOSERIAL.print(XSTRINGIFY(LAMBDASERIAL));
-			INFOSERIAL.println(":");
-#endif
+
+			INFOSERIAL(print(XSTRINGIFY(LAMBDASERIAL)));
+			INFOSERIAL(println(":"));
+
 			LAMBDASERIAL.begin(115200);
 			LAMBDASERIAL.setTimeout(200);
 			//LAMBDASERIAL.print("9\r");
@@ -45,10 +47,10 @@ public:
 			for (int k = 0; k < 12; k++) {
 				for (int i = 0; i < sizeof(response); i++) response[i] = '\0';
 				int iread = LAMBDASERIAL.readBytesUntil('\n', response, sizeof(response));
-#ifdef INFOSERIAL
-				INFOSERIAL.println(response);
-				INFOSERIAL.flush();
-#endif
+
+				INFOSERIAL(println(response));
+				INFOSERIAL(flush());
+
 			}
 		}
 		int res=0;
@@ -91,9 +93,9 @@ public:
 #endif
 				}
 			if (res != SerialReadChksumError) break;
-#ifdef INFOSERIAL
-			if(j==ntries)	INFOSERIAL.println("j==ntries");
-#endif
+
+			if(j==ntries)	INFOSERIAL(println("j==ntries"));
+
 		}
 
 		return res;
@@ -105,17 +107,18 @@ _lambdaProbe1 LAMBDA1;
 
 #ifdef LAMBDA2SERIAL
 class _lambdaProbe2 {
-	bool initdone = false;
+	
 	static const int responseLen = 24;
 	char response[responseLen];
 public:
+	bool initdone = false;
 	int Lambda() {
 		if (!initdone) {
 			initdone = true;
-#ifdef INFOSERIAL
-			INFOSERIAL.print(XSTRINGIFY(LAMBDA2SERIAL));
-			INFOSERIAL.println(":");
-#endif
+
+			INFOSERIAL(print(XSTRINGIFY(LAMBDA2SERIAL)));
+			INFOSERIAL(println(":"));
+
 			LAMBDA2SERIAL.begin(115200);
 			LAMBDA2SERIAL.setTimeout(200);
 			//LAMBDASERIAL.print("9\r");
@@ -126,10 +129,10 @@ public:
 			for (int k = 0; k < 12; k++) {
 				for (int i = 0; i < sizeof(response); i++) response[i] = '\0';
 				int iread = LAMBDA2SERIAL.readBytesUntil('\n', response, sizeof(response));
-#ifdef INFOSERIAL
-				INFOSERIAL.println(response);
-				INFOSERIAL.flush();
-#endif
+
+				INFOSERIAL(println(response));
+				INFOSERIAL(flush());
+
 			}
 		}
 		int res = 0;
@@ -172,9 +175,9 @@ public:
 #endif
 		}
 		if (res != SerialReadChksumError) break;
-#ifdef INFOSERIAL
-		if (j == ntries)	INFOSERIAL.println("j==ntries");
-#endif
+
+		if (j == ntries)	INFOSERIAL(println("j==ntries"));
+
 	}
 
 		return res;
